@@ -5,7 +5,12 @@
     <title>Booking for {{competition['name']}} || GUDLFT</title>
 </head>
 <body>
-    <h2>{{competition['name']}}</h2>
+    <h2>{{competition['name']}}</h2><br>
+    <h4>{{club['name']}}</h4>
+    <p>Number of club points available: {{club['points']}}</p><br>
+    {% if error %}
+        <p>{{error}} !</p><br>
+    {% endif %}
     Places available: {{competition['numberOfPlaces']}}
     <form action="/purchasePlaces" method="post">
         <input type="hidden" name="club" value="{{club['name']}}">
