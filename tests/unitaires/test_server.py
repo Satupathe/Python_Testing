@@ -1,19 +1,15 @@
 import flask
 import pytest
 import server
-from server import showSummary, clubs
+from server import showSummary, clubs, app
 from flask import Flask, template_rendered, url_for, request, current_app
 
 
-@pytest.fixture
-def app():
-    app = Flask(__name__)
-    return app
 
 @pytest.fixture
-def client(app):
-    client = app.test_client()
-    return client
+def client():
+    with app.test_client() as client:
+        yield client
 
 class TestLoginEmail:
 
@@ -28,25 +24,23 @@ class TestLoginEmail:
     def test_login_mail_exist(self, client, mocker):        
         mocker.patch.object(server, 'clubs', self.listOfClubs)
 
-        request = client.post('/showSummary',
+        response = client.post('/showSummary',
                               data=dict(email=self.login_email),
                               follow_redirects=True
                               )
-        data = request.data.decode()
-        print(data)
-        assert request.status_code == 200
-        assert data.find("error") == -1
+        data = response.data.decode()
+        assert response.status_code == 200
+        assert "Welcome" in data
 
     def test_login_email_unknown(self, client, mocker):
         mocker.patch.object(server, 'clubs', self.listOfClubs)
-        request = client.post('/showSummary',
+        response = client.post('/showSummary',
                               data=dict(email=self.unknown_email),
                               follow_redirects=True
                               )
-        data = request.data.decode()
-        print(data)
-        assert request.status_code == 200
-        assert data.find("error") == "Unknown email"""
+        data = response.data.decode()
+        assert response.status_code == 200
+        assert "Unknown email" in data
 
 
 

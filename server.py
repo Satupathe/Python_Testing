@@ -15,14 +15,13 @@ def loadCompetitions():
          return listOfCompetitions
 
 
-
 app = Flask(__name__)
 app.secret_key = 'something_special'
 
 competitions = loadCompetitions()
 clubs = loadClubs()
 
-@app.route('/',)
+@app.route('/')
 def index():
     return render_template('index.html')
 
@@ -35,7 +34,7 @@ def showSummary():
         error = "Unknown email"
         flash("Unknown email")
         time.sleep(2)
-        return redirect('/')
+        return render_template('index.html', error=error)
 
 
 @app.route('/book/<competition>/<club>')
@@ -54,15 +53,15 @@ def purchasePlaces():
     competition = [c for c in competitions if c['name'] == request.form['competition']][0]
     club = [c for c in clubs if c['name'] == request.form['club']][0]
     places_required = int(request.form['places'])
+    competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-places_required
     club_points = int(club["points"])
     if places_required > club_points:
-        error = "You can't book more places than your club current nunmber of points"
-        return render_template('booking.html', club=club, competition=competition, error=error)
+            error = "You can't book more places than your club current number of points"
+            return render_template('booking.html', club=club, competition=competition, error=error)
     else:
         competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - places_required
         flash('Great-booking complete!')
         return render_template('welcome.html', club=club, competitions=competitions)
-
 
 
 # TODO: Add route for points display
