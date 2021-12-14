@@ -78,7 +78,9 @@ def purchasePlaces():
         error = "You cannot book more than 12 places for each competition"
         return render_template('booking.html', club=club, competition=competition, error=error)
 
-# TODO: Add route for points display
+@app.route('/clubsList', methods=['GET'])
+def getClubsList():
+    return render_template('clubs_list.html', clubs=clubs)
 
 
 @app.route('/logout')

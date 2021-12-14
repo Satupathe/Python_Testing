@@ -1,0 +1,15 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Summary | GUDLFT clubs list</title>
+</head>
+<body>
+    <p>Here, you can see and follow each club remaining points</p>
+    <ul>
+    {% for club in clubs %}
+        <li>Club name: {{club['name']}}  |  {{club['points']}} points</li><br>
+    {% endfor %}
+    </ul>
+</body>
+</html>
