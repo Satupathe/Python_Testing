@@ -16,7 +16,12 @@
         <input type="hidden" name="club" value="{{club['name']}}">
         <input type="hidden" name="competition" value="{{competition['name']}}">
         <label for="places">How many places?</label><input type="number" name="places" id=""/>
-        <button type="submit">Book</button>
+        {% if period == 'past'%}
+            <button type="hidden">Book</button><br>
+            <p>You cannot book places for an already past competition</p>
+        {% else %}
+            <button type="submit">Book</button>
+        {% endif %}
     </form>
 </body>
 </html>

@@ -1,7 +1,7 @@
 import flask
 import pytest
 import server
-from server import showSummary, clubs, app
+from server import showSummary, clubs, app, book
 from flask import Flask, template_rendered, url_for, request, current_app
 
 
@@ -16,7 +16,7 @@ class TestLoginEmail:
         self.listOfClubs = [{'name': 'club_1', 'email': 'email_club_1', 'points': "30"},
                     {'name': 'club_2', 'email': 'email_club_2', 'points': "5"}]
         self.listOfCompetitions = [{"name": "competition_1","date": "2020-03-27 10:00:00","numberOfPlaces": "25"},
-                            {"name": "Fall Classic","date": "2020-10-22 13:30:00","numberOfPlaces": "13"}]
+                            {"name": "competition_2","date": "2020-10-22 13:30:00","numberOfPlaces": "13"}]
         self.login_email = "email_club_1"
         self.unknown_email = "email_club_3"
 
@@ -48,7 +48,7 @@ class TestUseClubPoints:
         self.listOfClubs = [{'name': 'club_1', 'email': 'email_club_1', 'points': "30"},
                     {'name': 'club_2', 'email': 'email_club_2', 'points': "5"}]
         self.listOfCompetitions = [{"name": "competition_1","date": "2020-03-27 10:00:00","numberOfPlaces": "25"},
-                            {"name": "Fall Classic","date": "2020-10-22 13:30:00","numberOfPlaces": "13"}]
+                            {"name": "competition_2","date": "2020-10-22 13:30:00","numberOfPlaces": "13"}]
         self.less_than_club_points = "3"
         self.more_than_club_points = "8"
 
@@ -87,7 +87,7 @@ class TestMaxBookingPlaces:
         self.listOfClubs = [{'name': 'club_1', 'email': 'email_club_1', 'points': "30"},
                     {'name': 'club_2', 'email': 'email_club_2', 'points': "5"}]
         self.listOfCompetitions = [{"name": "competition_1","date": "2020-03-27 10:00:00","numberOfPlaces": "25"},
-                            {"name": "Fall Classic","date": "2020-10-22 13:30:00","numberOfPlaces": "13"}]
+                            {"name": "competition_2","date": "2020-10-22 13:30:00","numberOfPlaces": "13"}]
         self.less_than_max_places = "3"
         self.more_than_max_places = "15"
 
@@ -104,6 +104,7 @@ class TestMaxBookingPlaces:
                               )
         data = response.data.decode()
         assert response.status_code == 200
+        #data['template_name_or_list']
         expected_error_message = "You cannot book more than 12 places for each competition"
         assert expected_error_message not in data
 
@@ -121,3 +122,70 @@ class TestMaxBookingPlaces:
         assert response.status_code == 200
         expected_error_message = "You cannot book more than 12 places for each competition"
         assert expected_error_message in data
+
+class TestBookingPastCompetitions:
+    def setup(self):
+        self.listOfClubs = [{'name': 'club_1', 'email': 'email_club_1', 'points': "30"},
+                    {'name': 'club_2', 'email': 'email_club_2', 'points': "5"}]
+        self.listOfCompetitions = [{"name": "competition_1","date": "2020-03-27 10:00:00","numberOfPlaces": "25"},
+                            {"name": "competition_2","date": "2024-10-22 13:30:00","numberOfPlaces": "13"}]
+        self.expected_error_message = "You cannot book places for an already past competition"
+        self.unknown_club = 'unknown_club'
+        self.unknown_competition = 'unknown_competition'
+        self.something_went_wrong_message = "Something went wrong-please try again"
+
+    def test_unknown_club(self, client, mocker):
+        mocker.patch.object(server, 'clubs', self.listOfClubs)
+        mocker.patch.object(server, 'competitions', self.listOfCompetitions)
+        
+        response = client.post('/book/<competition_2>/<unknown_club>',
+                              data=dict(club=self.listOfClubs[0]['name'],
+                                        competition=self.listOfCompetitions[1]['name']),
+                              follow_redirects=True
+                              )
+        data = response.data.decode()
+        print(data)
+        assert response.status_code == 200
+        assert self.something_went_wrong_message in data
+
+    def test_unknown_competition(self, client, mocker):
+        mocker.patch.object(server, 'clubs', self.listOfClubs)
+        mocker.patch.object(server, 'competitions', self.listOfCompetitions)
+
+        response = client.post('/book/<unknown_competition>/<club_1>',
+                              data=dict(club=self.listOfClubs[0]['name'],
+                                        competition=self.listOfCompetitions[1]['name']),
+                              follow_redirects=True
+                              )
+        data = response.data.decode()
+        print(data)
+        assert response.status_code == 200
+        assert self.something_went_wrong_message in data
+
+    def test_book_in_futur_competition(self,client,mocker):        
+        mocker.patch.object(server, 'clubs', self.listOfClubs)
+        mocker.patch.object(server, 'competitions', self.listOfCompetitions)
+
+        response = client.post('/book/<competition_2>/<club_1>',
+                               data=dict(club=self.listOfClubs[0]['name'],
+                                         competition=self.listOfCompetitions[1]['name']),
+                               follow_redirects=True
+                               )
+        data = response.data.decode()
+        print(data)
+        assert response.status_code == 200
+        assert self.expected_error_message not in data
+        
+    def test_book_in_past_competition(self,client,mocker):        
+        mocker.patch.object(server, 'clubs', self.listOfClubs)
+        mocker.patch.object(server, 'competitions', self.listOfCompetitions)
+
+        response = client.post('/book/<competition_1>/<club_1>',
+                               data=dict(club=self.listOfClubs[0]['name'],
+                                         competition=self.listOfCompetitions[1]['name']),
+                               follow_redirects=True
+                               )
+        data = response.data.decode()
+        print(data)
+        assert response.status_code == 200
+        assert self.expected_error_message not in data
