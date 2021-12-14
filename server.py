@@ -64,8 +64,9 @@ def purchasePlaces():
     competition = [c for c in competitions if c['name'] == request.form['competition']][0]
     club = [c for c in clubs if c['name'] == request.form['club']][0]
     places_required = int(request.form['places'])
-    competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-places_required
     club_points = int(club["points"])
+    competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-places_required
+    club['points'] = club_points - places_required
     if places_required < 12:
         if places_required > club_points:
                 error = "You cannot book more places than your club current number of points"
