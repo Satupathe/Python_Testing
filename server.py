@@ -38,7 +38,7 @@ def showSummary():
         return render_template('index.html', error=error)
 
 
-@app.route('/book/<competition>/<club>',methods=['POST'])
+@app.route('/book/<competition>/<club>')
 def book(competition,club):
     try:
         foundClub = [c for c in clubs if c['name'] == club][0]
@@ -72,7 +72,6 @@ def purchasePlaces():
                 error = "You cannot book more places than your club current number of points"
                 return render_template('booking.html', club=club, competition=competition, error=error)
         else:
-            competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - places_required
             flash('Great-booking complete!')
             return render_template('welcome.html', club=club, competitions=competitions)
     else:

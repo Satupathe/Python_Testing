@@ -1,7 +1,7 @@
 import flask
 import pytest
 import server
-from server import showSummary, clubs, app, book
+from server import showSummary, clubs, app, book, getClubsList
 from flask import Flask, template_rendered, url_for, request, current_app
 
 
@@ -137,10 +137,7 @@ class TestBookingPastCompetitions:
     def test_unknown_club(self, client, mocker):
         mocker.patch.object(server, 'clubs', self.listOfClubs)
         mocker.patch.object(server, 'competitions', self.listOfCompetitions)
-        
-        response = client.post('/book/<competition_2>/<unknown_club>',
-                              data=dict(club=self.listOfClubs[0]['name'],
-                                        competition=self.listOfCompetitions[1]['name']),
+        response = client.get('/book/<competition_1>/<unknown_club>',
                               follow_redirects=True
                               )
         data = response.data.decode()
@@ -151,10 +148,8 @@ class TestBookingPastCompetitions:
     def test_unknown_competition(self, client, mocker):
         mocker.patch.object(server, 'clubs', self.listOfClubs)
         mocker.patch.object(server, 'competitions', self.listOfCompetitions)
-
-        response = client.post('/book/<unknown_competition>/<club_1>',
-                              data=dict(club=self.listOfClubs[0]['name'],
-                                        competition=self.listOfCompetitions[1]['name']),
+        
+        response = client.get('/book/<unknown_competition>/<club_1>',
                               follow_redirects=True
                               )
         data = response.data.decode()
@@ -166,26 +161,52 @@ class TestBookingPastCompetitions:
         mocker.patch.object(server, 'clubs', self.listOfClubs)
         mocker.patch.object(server, 'competitions', self.listOfCompetitions)
 
-        response = client.post('/book/<competition_2>/<club_1>',
-                               data=dict(club=self.listOfClubs[0]['name'],
-                                         competition=self.listOfCompetitions[1]['name']),
-                               follow_redirects=True
-                               )
-        data = response.data.decode()
-        print(data)
-        assert response.status_code == 200
-        assert self.expected_error_message not in data
+        with app.app_context():
+            result = book(self.listOfCompetitions[1]['name'],self.listOfClubs[0]['name'])
+            print(result)
+            assert self.expected_error_message not in result 
         
     def test_book_in_past_competition(self,client,mocker):        
         mocker.patch.object(server, 'clubs', self.listOfClubs)
         mocker.patch.object(server, 'competitions', self.listOfCompetitions)
+        with app.app_context():
+            result = book(self.listOfCompetitions[0]['name'],self.listOfClubs[0]['name'])
+            print(result)
+            assert self.expected_error_message in result 
 
-        response = client.post('/book/<competition_1>/<club_1>',
-                               data=dict(club=self.listOfClubs[0]['name'],
-                                         competition=self.listOfCompetitions[1]['name']),
+
+class TestLogOut:
+    def setup(self):
+        self.expected_message = "Welcome to the GUDLFT Registration Portal!"
+
+    def test_index_after_logout(self, client):
+        response = client.get('/logout',
                                follow_redirects=True
                                )
         data = response.data.decode()
-        print(data)
         assert response.status_code == 200
-        assert self.expected_error_message not in data
+        assert self.expected_message in data
+
+class TestIndex:
+    def setup(self):
+        self.expected_message = "Welcome to the GUDLFT Registration Portal!"
+
+    def test_index_first_page(self, client):
+        response = client.get('/',
+                               follow_redirects=True
+                               )
+        data = response.data.decode()
+        assert response.status_code == 200
+        assert self.expected_message in data
+
+class TestClubList:
+    def setup(self):
+        self.expected_message = "Here, you can see and follow each club remaining points"
+
+    def test_redirect_to_list(self, client):
+        response = client.get('/clubsList',
+                               follow_redirects=True
+                               )
+        data = response.data.decode()
+        assert response.status_code == 200
+        assert self.expected_message in data
