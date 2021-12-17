@@ -1,7 +1,7 @@
 import flask
 import pytest
 import server
-from server import showSummary, clubs, app, book, getClubsList
+from server import showSummary, clubs, app, book, getClubsList, purchasePlaces
 from flask import Flask, template_rendered, url_for, request, current_app
 
 
@@ -210,3 +210,4 @@ class TestClubList:
         data = response.data.decode()
         assert response.status_code == 200
         assert self.expected_message in data
+        
