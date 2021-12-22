@@ -1,20 +1,26 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-import pytest
-import server
-from server import showSummary, clubs, app, book, getClubsList
-from flask import Flask, template_rendered, url_for, request, current_app
+from selenium.webdriver.common.by import By
+from selenium.webdriver.firefox.service import Service
 import time
 
 
 class TestAuthentication:
     def test_showSummary(self):
-        self.browser = webdriver.Firefox("tests/functional_tests/geckodriver.exe")
-        self.browser.get("http://http://127.0.0.1:5000/")
-        self.browser.find_element_by_name('email').send_keys("kate@shelifts.co.uk")
-        self.browser.find_element_by_tag_name('button').click()
-        time.sleep(3)
-        assert self.browser.title == "Summary | GUDLFT Registration"
-        assert self.browser.current_url == "http://127.0.0.1:5000/showSummary"
-        time.sleep(3)
-        self.browser.close()
+        browser = webdriver.Firefox(service=Service("tests/functional_tests/geckodriver.exe"))
+        browser.get("http://127.0.0.1:5000/")
+        browser.find_element(By.NAME,'email').send_keys("kate@shelifts.co.uk")
+        browser.find_element(By.TAG_NAME,'button').click()
+        assert browser.title == "Summary | GUDLFT Registration"
+        assert browser.current_url == "http://127.0.0.1:5000/showSummary"
+        browser.close()
+
+    def test_logout_route(self):
+        browser = webdriver.Firefox(service=Service("tests/functional_tests/geckodriver.exe"))
+        browser.get("http://127.0.0.1:5000/")
+        browser.find_element(By.NAME,'email').send_keys("kate@shelifts.co.uk")
+        browser.find_element(By.TAG_NAME,'button').click()
+        browser.find_element(By.CLASS_NAME,"logout").click()
+        assert browser.title == "GUDLFT Registration"
+        assert browser.current_url == "http://127.0.0.1:5000/"
+        browser.close()
