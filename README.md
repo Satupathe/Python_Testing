@@ -2,7 +2,6 @@
 
 1. Why
 
-
     This is a proof of concept (POC) project to show a light-weight version of our competition booking platform. The aim is the keep things as light as possible, and use feedback from the users to iterate.
 
 2. Getting Started
@@ -14,7 +13,6 @@
     * [Flask](https://flask.palletsprojects.com/en/1.1.x/)
 
         Whereas Django does a lot of things for us out of the box, Flask allows us to add only what we need. 
-     
 
     * [Virtual environment](https://virtualenv.pypa.io/en/stable/installation.html)
 
@@ -22,6 +20,23 @@
 
         Before you begin, please ensure you have this installed globally. 
 
+    * [Selenium](https://selenium-python.readthedocs.io/)
+
+        Allow to automate test of functional/user path by emulating real user action 
+
+        You can directly test it with selenium for functionnal test will be included in Pytest tests (next part)  
+    
+    * [Pytest](https://docs.pytest.org/en/6.2.x/) 
+
+        Package for unit and integration testing using features like mocker and fixture.
+
+    * [Locust](https://locust.io/)
+
+        Define tasks to be tested continuously and assess response time hence define project performance
+
+    * [Coverage](https://coverage.readthedocs.io/en/6.2/)
+
+        Assess code percentage cover by tests. Define 
 
 3. Installation
 
@@ -44,8 +59,43 @@
 
 5. Testing
 
-    You are free to use whatever testing framework you like-the main thing is that you can show what tests you are using.
+    * [Pytest](https://docs.pytest.org/en/6.2.x/) 
 
-    We also like to show how well we're testing, so there's a module called 
-    [coverage](https://coverage.readthedocs.io/en/coverage-5.1/) you should add to your project.
+        - Set your terminal to your project parent directory and type <code>flask run<code> then enter to start your Flask server. This will be needed in the following steps.
+            * If you ever encounter an error <code>Error: Could not locate a Flask application.<code> type <code>$env:FLASK_APP="server.py"<code> then enter and try again to launch your server
 
+        - Open another terminal(don't close the first one) and set it again to your project parent directory
+
+        - In the new terminal type <code>pytest<code> then enter
+
+        - All test will be launch consecutively and you'll find a success report at the end. Approximative testing time: 1 minute.
+
+    * [Coverage](https://coverage.readthedocs.io/en/6.2/)
+
+        - Keep your flask server running on your first terminal or launch it if you close it before(following Pytest steps)
+
+        - Set your second terminal to your project parent directory
+
+        - Activate coverage with <code>pytest --cov=.<code> in your second terminal. This will launch your testing again and display coverage percentage
+
+        - Activate coverage with an html report through <code>pytest --cov=. --cov-report html<code> 
+        
+        - In a web browser follow this adress: http://127.0.0.1:5500/coverage_html/index.html
+
+        - You will find coverage detail by clicking on a file name
+
+    * [locust](https://locust.io/)
+
+        - Keep your flask server running on your first terminal or launch it if you close it before(following Pytest steps)
+        
+        - Set your second terminal to the following folder tests/performance_tests
+
+        - Activate Locust with <code>locust<code> in your second terminal.
+
+        - Open a web browser with one of the following adress: http://0.0.0.0:8089 or localhost:8089
+
+        - In the window set:
+            * Number of users to 6
+            * Spawn rate to 1
+            * Host to http://127.0.0.1:5000
+            * Click on Start swarming
