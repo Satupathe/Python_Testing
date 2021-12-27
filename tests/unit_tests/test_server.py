@@ -154,6 +154,7 @@ class TestBookingPastCompetitions:
                               follow_redirects=True
                               )
         data = response.data.decode()
+        print(data)
         assert response.status_code == 200
         assert self.something_went_wrong_message in data
 
@@ -165,6 +166,7 @@ class TestBookingPastCompetitions:
                               follow_redirects=True
                               )
         data = response.data.decode()
+        print(data)
         assert response.status_code == 200
         assert self.something_went_wrong_message in data
 

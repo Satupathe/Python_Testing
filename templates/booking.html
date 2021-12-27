@@ -18,7 +18,7 @@
         <label for="places">How many places?</label><input type="number" name="places" id=""/>
         {% if period == 'past' %}
             <p class="error">You cannot book places for an already past competition</p>
-        {% elif period == 'futur' %}
+        {% else %}
             <button type="submit">Book</button>
         {% endif %}
     </form>

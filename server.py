@@ -1,7 +1,6 @@
 import json
-import time
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, flash, url_for
+from flask import Flask, render_template, request, redirect, url_for
 
 
 def loadClubs():
@@ -35,8 +34,6 @@ def showSummary():
         return render_template('welcome.html', club=club, competitions=competitions)
     else:
         error = "Unknown email"
-        flash("Unknown email")
-        time.sleep(2)
         return render_template('index.html', error=error)
 
 
@@ -64,8 +61,8 @@ def book(competition, club):
                                        competition=foundCompetition,
                                        period=competition_period)
     except IndexError:
-        flash("Something went wrong-please try again")
-        return render_template('welcome.html', club=club, competitions=competitions)
+        wrong = "Something went wrong-please try again"
+        return render_template('welcome.html', club=club, competitions=competitions, wrong=wrong)
 
 
 @app.route('/purchasePlaces', methods=['POST'])
@@ -75,15 +72,15 @@ def purchasePlaces():
     places_required = int(request.form['places'])
     points_required = places_required * 3
     club_points = int(club["points"])
-    competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - places_required
-    club['points'] = club_points - points_required
     if places_required < 12:
         if points_required > club_points:
             error = "You cannot book more places than your club current number of points"
             return render_template('booking.html', club=club, competition=competition, error=error)
         else:
-            flash('Great-booking complete!')
-            return render_template('welcome.html', club=club, competitions=competitions)
+            competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - places_required
+            club['points'] = club_points - points_required
+            success = f"you have successfully booked {places_required} places."
+            return render_template('welcome.html', club=club, competitions=competitions, success=success)
     else:
         error = "You cannot book more than 12 places for each competition"
         return render_template('booking.html', club=club, competition=competition, error=error)
